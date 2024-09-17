@@ -1,0 +1,42 @@
+CREATE TABLE role (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(20) NOT NULL
+);
+
+CREATE TABLE subject (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE room (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE status (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(45) NOT NULL
+);
+
+CREATE TABLE user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    firstName VARCHAR(45) NOT NULL,
+    lastName VARCHAR(45) NOT NULL,
+    idRole INTEGER,
+    isAdmin TINYINT,
+    FOREIGN KEY (idRole) REFERENCES role(id)
+);
+
+CREATE TABLE activity (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    idUser INTEGER,
+    startTime DATETIME NOT NULL,
+    idSubject INTEGER,
+    idRoom INTEGER,
+    idStatus TINYINT,
+    duration TINYINT,
+    FOREIGN KEY (idUser) REFERENCES user(id),
+    FOREIGN KEY (idSubject) REFERENCES subject(id),
+    FOREIGN KEY (idRoom) REFERENCES room(id),
+    FOREIGN KEY (idStatus) REFERENCES status(id)
+);

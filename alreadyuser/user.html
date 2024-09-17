@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Features</title>
+    <link rel="stylesheet" href="userstyle.css"> <!-- Link to the CSS file -->
+</head>
+<body>
+    <h2>Registrer Aktivitet</h2>
+    <form action="/regActivity" method="post">
+        <label for="userId">Bruker-ID:</label>
+        <input type="number" id="userId" name="userId" required><br>
+        <label for="activity">Aktivitet:</label>
+        <input type="text" id="activity" name="activity" required><br>
+        <button type="submit">Registrer Aktivitet</button>
+    </form>
+
+    <h2>Slett Bruker</h2>
+    <form action="/deleteUser" method="post">
+        <label for="dFirstName">Fornavn:</label>
+        <input type="text" id="dFirstName" name="firstName"><br>
+        <label for="dLastName">Etternavn:</label>
+        <input type="text" id="dLastName" name="lastName"><br>
+        <label for="dIsAdmin">Admin:</label>
+        <input type="number" id="dIsAdmin" name="isAdmin"><br>
+        <label for="dEmail">E-post:</label>
+        <input type="email" id="dEmail" name="email"><br>
+        <button type="submit">Slett</button>
+    </form>
+
+    <h2>Hent Bruker</h2>
+    <form action="/getUser" method="post">
+        <label for="gEmail">E-post:</label>
+        <input type="email" id="gEmail" name="email" required><br>
+        <button type="submit">Hent Bruker</button>
+    </form>
+</body>
+</html>

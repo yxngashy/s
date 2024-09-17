@@ -1,0 +1,32 @@
+<!-- views/user.ejs -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>User Page</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+    <h1>Welcome, <%= user.firstName %> <%= user.lastName %>!</h1>
+    <form action="/update-user" method="POST">
+        <input type="hidden" name="email" value="<%= user.email %>">
+<label for="firstName">First Name:</label>
+<input type="text" id="firstName" name="firstName" value="<%= user.firstName %>">
+<label for="lastName">Last Name:</label>
+<input type="text" id="lastName" name="lastName" value="<%= user.lastName %>">
+<button type="submit">Update</button>
+</form>
+
+<h2>Register Activity</h2>
+<form action="/register-activity" method="POST">
+    <label for="activityName">Activity Name:</label>
+    <input type="text" id="activityName" name="activityName" required>
+    <label for="activityStartDateTime">Start Date and Time:</label>
+    <input type="datetime-local" id="activityStartDateTime" name="activityStartDateTime" required>
+    <label for="activityEndDateTime">End Date and Time:</label>
+    <input type="datetime-local" id="activityEndDateTime" name="activityEndDateTime" required>
+    <label for="activityDescription">Description:</label>
+    <textarea id="activityDescription" name="activityDescription" required></textarea>
+    <button type="submit">Register</button>
+</form>
+</body>
+</html>
