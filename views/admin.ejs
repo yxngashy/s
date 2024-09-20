@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Admin Page</title>
+	<link rel="stylesheet" type="text/css" href="/styles.css">
+</head>
+<body>
+	<h1>Activity Log</h1>
+	<table>
+		<thead>
+			<tr>
+				<th>User ID</th>
+				<th>Activity</th>
+				<th>Timestamp</th>
+			</tr>
+		</thead>
+		<tbody>
+			<% activities.forEach(activity => { %>
+				<tr>
+					<td><%= activity.userId %></td>
+					<td><%= activity.activity %></td>
+					<td><%= activity.timestamp %></td>
+				</tr>
+			<% }) %>
+		</tbody>
+	</table>
+</body>
+</html>
