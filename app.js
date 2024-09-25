@@ -10,6 +10,7 @@ const session = require('express-session');
 const app = express();
 const port = 3000;
 
+
 // Get the absolute path of the database file
 const dbPath = path.resolve(__dirname, 'studietid.db');
 console.log(`Connecting to database at: ${dbPath}`);
@@ -109,6 +110,7 @@ app.post('/addUser', (req, res) => {
     console.log(`Attempting to add user with ID: ${userId}`);
     const result = addUser(firstName, lastName, idRole, email);
     res.send(result ? `Bruker lagt til med ID: ${userId}` : 'Feil ved å legge til bruker');
+    
 });
 
 // Function add user to the database
@@ -134,20 +136,47 @@ function addUser(firstName, lastName, idRole, email) {
 }
 
 // Login user
+// Login user
 app.post('/login', (req, res) => {
     const { email } = req.body;
-    try {
-        const stmt = db.prepare('SELECT * FROM user WHERE email = ?');
-        const user = stmt.get(email);
-        if (user) {
-            res.redirect(`/user?email=${email}`);
-        } else {
-            res.status(401).send('Invalid email');
-        }
-    } catch (error) {
-        console.error('Error logging in:', error.message);
-        res.status(500).send('Error logging in');
+    // Log user login
+    const user = finduser(email);
+
+    // Check if user exists
+    if (user) {
+        // Log the user login
+        logger.info(`User logged in: ${email}, Hardcoded ID: 1`);
+
+        // Return the hardcoded user ID (1)
+        res.json({
+            message: 'Login successful',
+            userId: 1, // Hardcoded ID
+            userEmail: user.email
+        });
+    } else {
+        // Log if user not found
+        logger.warn(`Login failed: User not found for email: ${email}`);
+        
+        // Respond with error
+        res.status(404).json({
+            message: 'User not found'
+        });
     }
+});
+
+
+function finduser(email) {
+    const stmt = db.prepare('SELECT * FROM user WHERE email = ?');
+    const user = stmt.get(email);
+    return user;
+}
+
+// Write content
+app.post('/write', (req, res) => {
+    const { email, content } = req.body;
+    // Log user writing activity
+    logger.info(`User wrote content: ${email}, Content: ${content}`);
+    res.send('Content saved');
 });
 
 // Route handler to update user information
@@ -164,24 +193,54 @@ app.post('/update-user', (req, res) => {
 });
 
 // Register activity
-app.post('/regActivity', ensureAuthenticated, (req, res) => {
-    const { activity } = req.body;
-    const userId = req.user.email; // Assuming email is used as userId
+// Register activity
+app.post('/regActivity', (req, res) => {
+    const userId = 1; // Hardcoded userId
+    const { activity, startTime } = req.body;
+
+    // Validate inputs
+    if (!activity || typeof activity !== 'string') {
+        return res.status(400).send('Invalid activity');
+    }
+    if (!startTime) {
+        return res.status(400).send('startTime is required');
+    }
+
+    // Convert startTime to a string if it's not already
+    const formattedStartTime = new Date(startTime).toISOString();
+
+    const stmt = db.prepare("INSERT INTO activity (userId, activity, formattedStartTime) VALUES (?, ?, ?)");
     try {
-        const stmt = db.prepare('INSERT INTO activity (userId, activity) VALUES (?, ?)');
-        stmt.run(userId, activity);
-        res.send('Aktivitet registrert');
-    } catch (error) {
-        console.error('Error registering activity:', error.message);
+        stmt.run(userId, activity, formattedStartTime);
+        res.send('Activity logged successfully');
+    } catch (err) {
+        console.error('Error registering activity:', err.message);
         res.status(500).send('Error registering activity');
     }
+
+    console.log('userId:', userId);
+    console.log('activity:', activity);
+    console.log('formattedStartTime:', formattedStartTime);
 });
+
+
+
+function ensureAuthenticated(req, res, next) {
+    if (req.isAuthenticated()) {
+        console.log('User is authenticated:', req.user);
+        if (req.user.idRole === 'admin') {
+            return next();
+        } else {
+            console.log('User is not an admin:', req.user);
+            return res.status(403).send('Access denied');
+        }
+    }
+    console.log('User is not authenticated');
+    res.redirect('/');
+}
 
 // Admin page to view activities
 app.get('/admin', ensureAuthenticated, (req, res) => {
-    if (req.user.idRole !== 'admin') {
-        return res.status(403).send('Access denied');
-    }
     try {
         const stmt = db.prepare('SELECT * FROM activity');
         const activities = stmt.all();
@@ -190,6 +249,17 @@ app.get('/admin', ensureAuthenticated, (req, res) => {
         console.error('Error fetching activities:', error.message);
         res.status(500).send('Error fetching activities');
     }
+});
+
+
+app.get('/admin/logs', (req, res) => {
+    const logFilePath = path.join(__dirname, 'user-activity.log');
+    fs.readFile(logFilePath, 'utf8', (err, data) => {
+        if (err) {
+            return res.status(500).send('Error reading log file');
+        }
+        res.send(`<pre>${data}</pre>`);
+    });
 });
 
 function ensureAuthenticated(req, res, next) {
@@ -228,6 +298,8 @@ app.post('/getUser', (req, res) => {
         res.status(500).send('Error fetching user');
     }
 });
+
+
 
 app.listen(port, () => {
     console.log(`Server kjører på http://localhost:${port}`);
