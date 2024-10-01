@@ -238,7 +238,42 @@ function ensureAuthenticated(req, res, next) {
     console.log('User is not authenticated');
     res.redirect('/');
 }
+// Register activity
+app.post('/regActivity', (req, res) => {
+    const { userId, activity, startTime, subject } = req.body;
 
+    // Ensure startTime is provided
+    if (!startTime) {
+        return res.status(400).send('startTime is required');
+    }
+
+    // Validate startTime
+    const date = new Date(startTime);
+    if (isNaN(date.getTime())) {
+        return res.status(400).send('Invalid startTime value');
+    }
+
+    // Convert startTime to ISO string
+    const formattedStartTime = date.toISOString();
+
+    // Ensure userId, activity, and subject are strings
+    const userIdStr = String(userId);
+    const activityStr = String(activity);
+    const subjectStr = String(subject);
+
+    // Log the values being bound
+    console.log('Binding values:', { userId: userIdStr, activity: activityStr, startTime: formattedStartTime, subject: subjectStr });
+
+    const stmt = db.prepare("INSERT INTO activity (userId, activity, startTime, subject) VALUES (?, ?, ?, ?)");
+    stmt.run(userIdStr, activityStr, formattedStartTime, subjectStr, (err) => {
+        if (err) {
+            console.error('Error registering activity:', err.message);
+            return res.status(500).send('Error registering activity');
+        }
+        res.send('Activity logged successfully');
+    });
+    stmt.finalize();
+});
 // Admin page to view activities
 app.get('/admin', ensureAuthenticated, (req, res) => {
     try {
